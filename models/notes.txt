@@ -1,0 +1,4 @@
+site free3d
+tKinter
+
+https://stackoverflow.com/questions/12904912/how-to-set-camera-position-for-3d-plots-using-python-matplotlib
