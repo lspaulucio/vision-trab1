@@ -98,7 +98,7 @@ class Window:
         projection = np.dot(Transforms.newProjectionMatrix(), self.obj.getPoints3d())
         projection = np.dot(self.cam.getIntrinsicMatrix(), projection)
 
-        figProjection.plot(projection[0], projection[1], 'k')
+        figProjection.plot(projection[0], projection[1], 'k.')
         # plt.draw()
         # plt.pause(0.001)
         # anim = animation.FuncAnimation(self.fig, self.update, frames=25, interval=50, blit=True)
