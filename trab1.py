@@ -1,7 +1,14 @@
+# Standard libraries
+from math import pi
+from threading import Thread
+from time import sleep
+import queue
+# My libraries
 from Object import Object
 from Window import Window
 from Camera import Camera
-import matplotlib.pyplot as plt
+
+
 '''Trabalho 1 - Entrega até 06/05/2019
 
 No primeiro trabalho vocês deverão fazer um programa onde será possível:
@@ -21,12 +28,75 @@ O trabalho poderá ser feito em dupla e deverá ser entregue/apresentado até o 
 
 Vocês deverão enviar o trabalho para raquel@ele.ufes.br até a data prevista e agendar a apresentação.'''
 
-obj = Object()
-obj.loadFile('box.xyz')
-f = plt.figure()
+# GridSpec
+# https://matplotlib.org/users/gridspec.html
 
-c = Camera()
-obj.show2d(c)
-# obj.show3d(f)
-# c.show()
-# w = Window(obj, obj)
+if __name__ == "__main__":
+
+    obj = Object()
+    obj.loadFile('box.xyz')
+    cam = Camera()
+    w = Window(obj,cam)
+    w.show()
+
+    while (True):
+
+        key = input("Choose an option:\nc - camera \
+                                      \no - object \
+                                      \ne - exit\n")
+
+        # Object selected
+        if key == 'o':
+            key = input("Choose an option:\nt - Translate \
+                                          \nr - Rotate\n")
+
+            if key == 't':
+                t = input("Enter with a translation vector: [dx, dy, dz]\n")
+                t = t.replace('[','')
+                t = t.replace(']','')
+                t = [float(i) for i in t.split(',')]
+                obj.translate(t[0],t[1],t[2])
+
+            if key == 'r':
+                angle = float(input("Enter with an angle in degrees:\n"))
+                angle *= pi/180
+                axis = input("Enter with a axis [x, y or z]\n")
+                obj.rotate(axis, angle)
+
+        # Camera selected
+        if key == 'c':
+            key = input("Choose a option:\nf - Focal distance \
+                                         \nr - Rotate \
+                                         \ns - Scale Factor \
+                                         \np - Main point\n")
+
+            if key == 'f':
+                f = input("Enter with a new focal distance f:\n")
+                cam.setFocalDistance(float(f))
+
+            if key == 'r':
+                angle = float(input("Enter with an angle in degrees:\n"))
+                angle *= pi/180
+                axis = input("Enter with a axis[x, y or z]\n")
+                cam.rotate(axis, angle)
+
+            if key == 's':
+                t = input("Enter with the scale factor for x-axis and y-axis [sx, sy]:\n")
+                t = t.replace('[','')
+                t = t.replace(']','')
+                t = [float(i) for i in t.split(',')]
+                cam.setSx(t[0])
+                cam.setSy(t[1])
+
+            if key == 'p':
+                t = input("Enter with the new main position [ox, oy]:\n")
+                t = t.replace('[','')
+                t = t.replace(']','')
+                t = [float(i) for i in t.split(',')]
+                cam.setOx(t[0])
+                cam.setOy(t[1])
+
+        if key == 'e':
+            exit()
+
+        w.show()

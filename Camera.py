@@ -1,12 +1,18 @@
+# Standard libraries
 import numpy as np
 import matplotlib.pyplot as plt
 
+# My libraries
+from Transforms import Transforms
 
-class Camera:
-    """ Object class"""
+
+class Camera(Transforms):
+    """ Camera class
+        This class inherits Transforms
+    """
 
     def __init__(self):
-        self.points = np.array([0, 0, 0, 1])
+        super().__init__(np.array([0, 0, 0, 1]))
         self.f = 1
         self.sx = 1
         self.sy = 1
@@ -22,6 +28,12 @@ class Camera:
 
     def setOy(self, y):
         self.oy = y
+
+    def setSx(self, x):
+        self.sx = x
+
+    def setSy(self, y):
+        self.sy = y
 
     # Arrumar ainda
     def getIntrinsicMatrix(self):
@@ -42,19 +54,22 @@ class Camera:
             quiver_ax[i].set_zlim([-2,2])
             quiver_ax[i].set_zlabel("z axis")
 
+        points = self.getPoints3d()
+
         # base vector values
         e1 = np.array([1, 0, 0])  # X
         e2 = np.array([0, 1, 0])  # Y
         e3 = np.array([0, 0, 1])  # Z
 
+        print(points)
         # adding quivers to the plot
         for i in range(len(quiver_ax)):
-            quiver_ax[i].quiver(self.points[0],self.points[1],self.points[2],e1,0,0,color='red',pivot='tail',  length=1)
-            quiver_ax[i].quiver(self.points[0],self.points[1],self.points[2],0,e2,0,color='green',pivot='tail',length=1)
-            quiver_ax[i].quiver(self.points[0],self.points[1],self.points[2],0,0,e3,color='blue',pivot='tail', length=1)
+            quiver_ax[i].quiver(points[0],points[1],points[2],e1,0,0,color='red',pivot='tail',  length=1)
+            quiver_ax[i].quiver(points[0],points[1],points[2],0,e2,0,color='green',pivot='tail',length=1)
+            quiver_ax[i].quiver(points[0],points[1],points[2],0,0,e3,color='blue',pivot='tail', length=1)
 
         # set camera view options of a plot
         quiver_ax[1].view_init(elev=90,azim=0)
-        quiver_ax[1].dist=7
+        quiver_ax[1].dist = 7
 
         plt.show()
