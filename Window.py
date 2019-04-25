@@ -1,8 +1,7 @@
 # Standard libraries
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import animation
-from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d import Axes3D, art3d
 
 # My libraries
 from Object import Object
@@ -76,49 +75,98 @@ class Window:
 
         fig = plt.figure()
 
-        fig3d = fig.add_subplot(2,1,1, projection='3d')
+        # Plotting object in the world
+        objPoints = self.obj.getPoints3d()
+        fig3d = fig.add_subplot(2, 1, 1, projection='3d')
         fig3d.set_title('3D World')
         fig3d.set_xlabel('x-axis')
         fig3d.set_ylabel('y-axis')
         fig3d.set_zlabel('z-axis')
-        fig3d.set_xlim([-2, 2])
-        fig3d.set_ylim([-1, 1])
-        fig3d.set_zlim([4, 8])
-        fig3d.view_init(elev=25, azim=-65)
+        fig3d.set_xlim([-3, 3])
+        fig3d.set_ylim([-3, 3])
+        fig3d.set_zlim([0, 10])
 
-        figProjection = fig.add_subplot(2,1,2)
+
+        # fig3d.view_init(elev=25, azim=-65)
+        fig3d.plot3D(objPoints[0, :], objPoints[1, :], objPoints[2, :], 'k.')
+        Transforms.set_axes_equal(fig3d)
+
+        self.cam.points = np.array(self.obj.getWorldPoints())
+        # self.cam.points = np.dot(Transforms.newScaleMatrix(0.5,1,1), self.cam.getWorldPoints())
+        obj3d = np.dot(self.cam.getExtrinsicMatrix(), self.cam.getWorldPoints())
+
+        # ax0 = self.set_plots()
+        a = []
+        a.append(fig3d)
+
+        p = []
+        p.append(np.mean(self.cam.getPoints3d()[0,:]))
+        p.append(np.mean(self.cam.getPoints3d()[1,:]))
+        p.append(np.mean(self.cam.getPoints3d()[2,:]))
+
+        self.draw_arrows(p, self.cam.getBaseMatrix(), a)
+        # OLHAR DIRECAO DO GIRO
+        fig3d.plot3D(obj3d[0, :], obj3d[1, :], obj3d[2, :], 'c.')
+
+        # Projection
+        camPoints = self.cam.getWorldPoints()
+        figProjection = fig.add_subplot(2, 1, 2)
         figProjection.set_title("Camera View")
         figProjection.set_xlabel("x-axis")
         figProjection.set_ylabel("y-axis")
 
-        points = self.obj.getPoints3d()
-        fig3d.plot3D(points[0, :], points[1, :], points[2, :], 'k.')
-        Transforms.set_axes_equal(fig3d)
-
-        projection = np.dot(Transforms.newProjectionMatrix(), self.obj.getPoints3d())
+        # ax0 = self.set_plots(figure=fig)
+        # p = [0,0,0,1]
+        # self.draw_arrows(p, Transforms.newBaseMatrix(), ax0)
+        # t = np.linalg.inv(self.cam.getExtrinsicMatrix())
+        # camPoints = np.dot(t, self.obj.getWorldPoints())
+        projection = np.dot(Transforms.newProjectionMatrix(), objPoints)
         projection = np.dot(self.cam.getIntrinsicMatrix(), projection)
 
-        figProjection.plot(projection[0], projection[1], 'k.')
+        # Z = projection[2]
+        # projection /= Z
+
+        # figProjection.plot(projection[0], projection[1], 'k.')
         # plt.draw()
         # plt.pause(0.001)
         # anim = animation.FuncAnimation(self.fig, self.update, frames=25, interval=50, blit=True)
         plt.show()
         plt.ion()
+        # exit()
+
+    @staticmethod
+    def draw_arrows(point, base, axis, length=1.5):
+        for i in range(len(axis)):
+            axis[i].quiver(point[0],point[1],point[2],base[0][0],base[0][1],base[0][2],color='red',pivot='tail',  length=length)
+            axis[i].quiver(point[0],point[1],point[2],base[1][0],base[1][1],base[1][2],color='green',pivot='tail',  length=length)
+            axis[i].quiver(point[0],point[1],point[2],base[2][0],base[2][1],base[2][2],color='blue',pivot='tail',  length=length)
+            # axis[i].quiver(point[0],point[2],point[1],base[0][0],base[0][2],base[0][1],color='red',pivot='tail',  length=length)
+            # axis[i].quiver(point[0],point[2],point[1],base[2][0],base[2][2],base[2][1],color='blue',pivot='tail',  length=length)
+            # axis[i].quiver(point[0],point[2],point[1],base[1][0],base[1][2],base[1][1],color='green',pivot='tail',  length=length)
 
 
-    def update(self):
+    @staticmethod
+    # Complementary functions for ploting points and vectors with Y-axis swapped with Z-axis
+    def set_plots(ax=None, figure=None, figsize=(9, 8), limx=[-2, 2], limy=[-2, 2], limz=[-2, 2], naxis=1):
+        if figure is None:
+            figure = plt.figure(figsize=(9, 8))
+        if ax is None:
+            ax = []
+            new_axis = True
+        else:
+            new_axis = False
+        for i in range(naxis):
+            if new_axis and naxis > 1:
+                ax.append(figure.add_subplot(1, 2, i+1, projection='3d'))
+            else:
+                #ax = plt.axes(projection='3d')
+                ax.append(figure.add_subplot(1, 1, 1, projection='3d'))
 
-        # Creating the Animation object
-        points = self.obj.getPoints3d()
-        self.fig3d.clear()
-        self.fig3d.plot3D(points[0,:], points[1, :], points[2, :], 'k.')
-        Transforms.set_axes_equal(self.fig3d)
-
-        projection = np.dot(Transforms.newProjectionMatrix(), self.obj.getPoints3d())
-        projection = np.dot(self.cam.getIntrinsicMatrix(), projection)
-
-        self.figProjection.plot(projection[0], projection[1], 'k.')
-        # plt.draw()
-        # plt.pause(0.001)
-        plt.ioff()
-        plt.show(block=False)
+            ax[i].set_title("Camera Calibration")
+            ax[i].set_xlim(limx)
+            ax[i].set_xlabel("x axis")
+            ax[i].set_ylim(limy)
+            ax[i].set_ylabel("z axis")
+            ax[i].set_zlim(limz)
+            ax[i].set_zlabel("y axis")
+        return ax

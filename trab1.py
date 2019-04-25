@@ -36,7 +36,7 @@ if __name__ == "__main__":
     obj = Object()
     obj.loadFile('box.xyz')
     cam = Camera()
-    w = Window(obj,cam)
+    w = Window(obj, cam)
     w.show()
 
     while (True):
@@ -52,10 +52,10 @@ if __name__ == "__main__":
 
             if key == 't':
                 t = input("Enter with a translation vector: [dx, dy, dz]\n")
-                t = t.replace('[','')
-                t = t.replace(']','')
+                t = t.replace('[', '')
+                t = t.replace(']', '')
                 t = [float(i) for i in t.split(',')]
-                obj.translate(t[0],t[1],t[2])
+                obj.translate(t[0], t[1], t[2])
 
             if key == 'r':
                 angle = float(input("Enter with an angle in degrees:\n"))
@@ -66,6 +66,7 @@ if __name__ == "__main__":
         # Camera selected
         if key == 'c':
             key = input("Choose a option:\nf - Focal distance \
+                                         \nt - Translate \
                                          \nr - Rotate \
                                          \ns - Scale Factor \
                                          \np - Main point\n")
@@ -73,6 +74,13 @@ if __name__ == "__main__":
             if key == 'f':
                 f = input("Enter with a new focal distance f:\n")
                 cam.setFocalDistance(float(f))
+
+            if key == 't':
+                t = input("Enter with a translation vector: [dx, dy, dz]\n")
+                t = t.replace('[', '')
+                t = t.replace(']', '')
+                t = [float(i) for i in t.split(',')]
+                cam.translate(t[0], t[1], t[2])
 
             if key == 'r':
                 angle = float(input("Enter with an angle in degrees:\n"))
@@ -82,16 +90,16 @@ if __name__ == "__main__":
 
             if key == 's':
                 t = input("Enter with the scale factor for x-axis and y-axis [sx, sy]:\n")
-                t = t.replace('[','')
-                t = t.replace(']','')
+                t = t.replace('[', '')
+                t = t.replace(']', '')
                 t = [float(i) for i in t.split(',')]
                 cam.setSx(t[0])
                 cam.setSy(t[1])
 
             if key == 'p':
                 t = input("Enter with the new main position [ox, oy]:\n")
-                t = t.replace('[','')
-                t = t.replace(']','')
+                t = t.replace('[', '')
+                t = t.replace(']', '')
                 t = [float(i) for i in t.split(',')]
                 cam.setOx(t[0])
                 cam.setOy(t[1])

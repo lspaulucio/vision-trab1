@@ -17,7 +17,7 @@ class Transforms:
         self.translationMatrix[2][-1] += dz
 
     def rotate(self, axis, angle):
-        self.rotationMatrix = np.dot(self.rotationMatrix, self.newRotationMatrix(axis, angle))
+        self.rotationMatrix = np.dot(self.newRotationMatrix(axis, angle), self.rotationMatrix)
 
     def getWorldPoints(self):
         return self.points
@@ -44,8 +44,8 @@ class Transforms:
     @staticmethod
     def newBaseMatrix():
 
-        return np.array([[1, 0, 0]
-                         [0, 1, 0]
+        return np.array([[1, 0, 0],
+                         [0, 1, 0],
                          [0, 0, 1]])
 
     @staticmethod
@@ -119,23 +119,3 @@ class Transforms:
         axis.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
         axis.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
         axis.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
-
-
-if __name__ == "__main__":
-
-    obj = loadObject('box.xyz')
-
-    fig = plt.figure()
-    ax0 = fig.add_subplot(5, 1, 1)
-    ax0 = plt.axes(projection='3d')
-    ax0.set_title('3D points')
-    ax0.set_xlabel('x-axis')
-    ax0.set_ylabel('y-axis')
-    ax0.set_zlabel('z-axis')
-    ax0.set_xlim([-2, 2])
-    ax0.set_ylim([-1, 1])
-    ax0.set_zlim([4, 8])
-
-    ax0.plot3D(obj[0, :], obj[1, :], obj[2, :], 'k.')
-    ax0.view_init(elev=25, azim=-65)
-    # plt.show()

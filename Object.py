@@ -11,8 +11,8 @@ class Object(Transforms):
         This class inherits Transforms
     """
 
-    def __init__(self):
-        super().__init__(None)
+    def __init__(self, points=None):
+        super().__init__(points)
         self.mesh = None
         self.vectors = None
         self.stl = False

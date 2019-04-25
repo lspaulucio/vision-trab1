@@ -41,17 +41,21 @@ class Camera(Transforms):
                          [0,              self.f*self.sy, self.oy],
                          [0,                     0,             1]])
 
+    def getBaseMatrix(self):
+        return np.dot(self.getRotationMatrix()[0:-1, 0:-1].T, self.newBaseMatrix())
+
+
     def show(self):
-        fig_quivers = plt.figure(figsize=(10,5))
+        fig_quivers = plt.figure(figsize=(10, 5))
         quiver_ax = []
         for i in range(2):
-            quiver_ax.append(fig_quivers.add_subplot(1,2,i+1,projection='3d'))
+            quiver_ax.append(fig_quivers.add_subplot(1, 2, i+1, projection='3d'))
             quiver_ax[i].set_title("reference arrows example")
-            quiver_ax[i].set_xlim([-2,2])
+            quiver_ax[i].set_xlim([-2, 2])
             quiver_ax[i].set_xlabel("x axis")
-            quiver_ax[i].set_ylim([-2,2])
+            quiver_ax[i].set_ylim([-2, 2])
             quiver_ax[i].set_ylabel("y axis")
-            quiver_ax[i].set_zlim([-2,2])
+            quiver_ax[i].set_zlim([-2, 2])
             quiver_ax[i].set_zlabel("z axis")
 
         points = self.getPoints3d()
@@ -69,7 +73,7 @@ class Camera(Transforms):
             quiver_ax[i].quiver(points[0],points[1],points[2],0,0,e3,color='blue',pivot='tail', length=1)
 
         # set camera view options of a plot
-        quiver_ax[1].view_init(elev=90,azim=0)
+        quiver_ax[1].view_init(elev=90, azim=0)
         quiver_ax[1].dist = 7
 
         plt.show()
