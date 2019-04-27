@@ -1,8 +1,5 @@
 # Standard libraries
 from math import pi
-from threading import Thread
-from time import sleep
-import queue
 # My libraries
 from Object import Object
 from Window import Window
@@ -48,6 +45,7 @@ if __name__ == "__main__":
         # Object selected
         if key == 'o':
             key = input("Choose an option:\nt - Translate \
+                                          \nro - Rotate Own Axis \
                                           \nr - Rotate\n")
 
             if key == 't':
@@ -57,17 +55,24 @@ if __name__ == "__main__":
                 t = [float(i) for i in t.split(',')]
                 obj.translate(t[0], t[1], t[2])
 
-            if key == 'r':
+            elif key == 'r':
                 angle = float(input("Enter with an angle in degrees:\n"))
                 angle *= pi/180
                 axis = input("Enter with a axis [x, y or z]\n")
                 obj.rotate(axis, angle)
 
+            elif key == 'ro':
+                angle = float(input("Enter with an angle in degrees:\n"))
+                angle *= pi/180
+                axis = input("Enter with a axis[x, y or z]\n")
+                obj.rotateSelf(axis, angle)
+
         # Camera selected
-        if key == 'c':
+        elif key == 'c':
             key = input("Choose a option:\nf - Focal distance \
                                          \nt - Translate \
-                                         \nr - Rotate \
+                                         \nro - Rotate Own Axis \
+                                         \nr - Rotate World\
                                          \ns - Scale Factor \
                                          \np - Main point\n")
 
@@ -75,20 +80,26 @@ if __name__ == "__main__":
                 f = input("Enter with a new focal distance f:\n")
                 cam.setFocalDistance(float(f))
 
-            if key == 't':
+            elif key == 't':
                 t = input("Enter with a translation vector: [dx, dy, dz]\n")
                 t = t.replace('[', '')
                 t = t.replace(']', '')
                 t = [float(i) for i in t.split(',')]
                 cam.translate(t[0], t[1], t[2])
 
-            if key == 'r':
+            elif key == 'r':
                 angle = float(input("Enter with an angle in degrees:\n"))
                 angle *= pi/180
                 axis = input("Enter with a axis[x, y or z]\n")
                 cam.rotate(axis, angle)
 
-            if key == 's':
+            elif key == 'ro':
+                angle = float(input("Enter with an angle in degrees:\n"))
+                angle *= pi/180
+                axis = input("Enter with a axis[x, y or z]\n")
+                cam.rotateSelf(axis, angle)
+
+            elif key == 's':
                 t = input("Enter with the scale factor for x-axis and y-axis [sx, sy]:\n")
                 t = t.replace('[', '')
                 t = t.replace(']', '')
@@ -96,7 +107,7 @@ if __name__ == "__main__":
                 cam.setSx(t[0])
                 cam.setSy(t[1])
 
-            if key == 'p':
+            elif key == 'p':
                 t = input("Enter with the new main position [ox, oy]:\n")
                 t = t.replace('[', '')
                 t = t.replace(']', '')
@@ -104,7 +115,7 @@ if __name__ == "__main__":
                 cam.setOx(t[0])
                 cam.setOy(t[1])
 
-        if key == 'e':
+        elif key == 'e':
             exit()
 
         w.show()

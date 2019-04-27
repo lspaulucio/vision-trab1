@@ -19,7 +19,7 @@ class Window:
 
         fig = self.fig
 
-        if newFig == False:
+        if newFig is False:
             fig = plt.figure()
 
         quiver_ax = []
@@ -50,32 +50,97 @@ class Window:
 
         # set camera view options of a plot
         quiver_ax[1].view_init(elev=90,azim=0)
-        quiver_ax[1].dist=7
+        quiver_ax[1].dist = 7
         plt.show()
 
-    def show3d(self, obj):
+    def showSTL(self):
 
-        # ax0 = fig.add_subplot(2, 1, 2, projection='3d')
-        points = obj.getWorldPoints()
-        ax0 = plt.figure()
-        ax0 = plt.axes(projection='3d')
-        ax0.set_title('3D points')
-        ax0.set_xlabel('x-axis')
-        ax0.set_ylabel('y-axis')
-        ax0.set_zlabel('z-axis')
-        ax0.set_xlim([-2, 2])
-        ax0.set_ylim([-1, 1])
-        ax0.set_zlim([4, 8])
-        ax0.plot3D(points[0, :], points[1, :], points[2, :], 'k.')
-        ax0.view_init(elev=25, azim=-65)
-        Transforms.set_axes_equal(ax0)
+        fig = plt.figure()
+
+        # Plotting object and camera in the world
+        # objPoints = self.obj.getPoints3d()
+        fig3d = fig.add_subplot(2, 1, 1, projection='3d')
+        fig3d.set_title('3D World')
+        fig3d.set_xlabel('x-axis')
+        fig3d.set_ylabel('y-axis')
+        fig3d.set_zlabel('z-axis')
+        # fig3d.set_xlim([-3, 3])
+        # fig3d.set_ylim([-3, 3])
+        # fig3d.set_zlim([0, 10])
+
+        a = []
+        a.append(fig3d)
+
+        p = []
+        p.append(np.mean(self.obj.getPoints3d()[0,:]))
+        p.append(np.mean(self.obj.getPoints3d()[1,:]))
+        p.append(np.mean(self.obj.getPoints3d()[2,:]))
+
+        # fig3d.view_init(elev=25, azim=-65)
+        self.draw_arrows(p, self.obj.getBaseMatrix(), a)
+
+        # Plot and render the faces of the object
+        fig3d.add_collection3d(art3d.Poly3DCollection(self.obj.vectors))
+        # Plot the contours of the faces of the object
+        fig3d.add_collection3d(art3d.Line3DCollection(self.obj.vectors, color='k', linewidths=0.2, linestyles='-'))
+        # Plot the vertices of the object
+        # axes1.plot(kong[0,:],kong[1,:],kong[2,:],'k.')
+
+        points = self.obj.getPoints3d()
+
+        # Set axes and their aspect
+        fig3d.auto_scale_xyz(points[0,:], points[1,:], points[2,:])
+        # Show the plots
+        # fig3d.plot3D(objPoints[0, :], objPoints[1, :], objPoints[2, :], 'k.')
+        Transforms.set_axes_equal(fig3d)
+
+        # self.cam.points = np.array(self.obj.getWorldPoints())
+        # self.cam.points = np.dot(Transforms.newScaleMatrix(0.5,1,1), self.cam.getWorldPoints())
+        # obj3d = np.dot(self.cam.getExtrinsicMatrix(), self.cam.getWorldPoints())
+
+        # ax0 = self.set_plots()
+        p = []
+        # p.append(np.mean(self.cam.getPoints3d()[0,:]))
+        # p.append(np.mean(self.cam.getPoints3d()[1,:]))
+        # p.append(np.mean(self.cam.getPoints3d()[2,:]))
+
+        p.append(self.cam.getPoints3d()[0])
+        p.append(self.cam.getPoints3d()[1])
+        p.append(self.cam.getPoints3d()[2])
+
+        self.draw_arrows(p, self.cam.getBaseMatrix(), a)
+        # OLHAR DIRECAO DO GIRO
+        # fig3d.plot3D(obj3d[0, :], obj3d[1, :], obj3d[2, :], 'c.')
+
+        # Projection
+        figProjection = fig.add_subplot(2, 1, 2)
+        figProjection.set_title("Camera View")
+        figProjection.set_xlabel("x-axis")
+        figProjection.set_ylabel("y-axis")
+        figProjection.set_xlim([-1, 1])
+        figProjection.set_ylim([-1, 1])
+
+        # objPoints = self.obj.getPoints3d() - self.cam.getPoints3d()
+        # ax0 = self.set_plots(figure=fig)
+        # p = [0,0,0,1]
+        # self.draw_arrows(p, Transforms.newBaseMatrix(), ax0)
+        t = np.linalg.inv(self.cam.getExtrinsicMatrix())
+        obj2Cam = np.dot(t, self.obj.getPoints3d())
+        projection = np.dot(Transforms.newProjectionMatrix(), obj2Cam)
+        projection = np.dot(self.cam.getIntrinsicMatrix(), projection)
+
+        Z = projection[2]
+        projection /= Z
+
+        figProjection.plot(projection[0], projection[1], 'k')
         plt.show()
+        plt.ion()
 
     def show(self):
 
         fig = plt.figure()
 
-        # Plotting object in the world
+        # Plotting object and camera in the world
         objPoints = self.obj.getPoints3d()
         fig3d = fig.add_subplot(2, 1, 1, projection='3d')
         fig3d.set_title('3D World')
@@ -86,64 +151,74 @@ class Window:
         fig3d.set_ylim([-3, 3])
         fig3d.set_zlim([0, 10])
 
-
-        # fig3d.view_init(elev=25, azim=-65)
-        fig3d.plot3D(objPoints[0, :], objPoints[1, :], objPoints[2, :], 'k.')
-        Transforms.set_axes_equal(fig3d)
-
-        self.cam.points = np.array(self.obj.getWorldPoints())
-        # self.cam.points = np.dot(Transforms.newScaleMatrix(0.5,1,1), self.cam.getWorldPoints())
-        obj3d = np.dot(self.cam.getExtrinsicMatrix(), self.cam.getWorldPoints())
-
-        # ax0 = self.set_plots()
         a = []
         a.append(fig3d)
 
         p = []
-        p.append(np.mean(self.cam.getPoints3d()[0,:]))
-        p.append(np.mean(self.cam.getPoints3d()[1,:]))
-        p.append(np.mean(self.cam.getPoints3d()[2,:]))
+        p.append(np.mean(self.obj.getPoints3d()[0,:]))
+        p.append(np.mean(self.obj.getPoints3d()[1,:]))
+        p.append(np.mean(self.obj.getPoints3d()[2,:]))
+
+        # print(p)
+        # fig3d.view_init(elev=25, azim=-65)
+        self.draw_arrows(p, self.obj.getBaseMatrix(), a)
+        fig3d.plot3D(objPoints[0, :], objPoints[1, :], objPoints[2, :], 'k.')
+        Transforms.set_axes_equal(fig3d)
+
+        # self.cam.points = np.array(self.obj.getWorldPoints())
+        # self.cam.points = np.dot(Transforms.newScaleMatrix(0.5,1,1), self.cam.getWorldPoints())
+        # obj3d = np.dot(self.cam.getExtrinsicMatrix(), self.cam.getWorldPoints())
+
+        # ax0 = self.set_plots()
+        p = []
+        # p.append(np.mean(self.cam.getPoints3d()[0,:]))
+        # p.append(np.mean(self.cam.getPoints3d()[1,:]))
+        # p.append(np.mean(self.cam.getPoints3d()[2,:]))
+
+        p.append(self.cam.getPoints3d()[0])
+        p.append(self.cam.getPoints3d()[1])
+        p.append(self.cam.getPoints3d()[2])
 
         self.draw_arrows(p, self.cam.getBaseMatrix(), a)
         # OLHAR DIRECAO DO GIRO
-        fig3d.plot3D(obj3d[0, :], obj3d[1, :], obj3d[2, :], 'c.')
+        # fig3d.plot3D(obj3d[0, :], obj3d[1, :], obj3d[2, :], 'c.')
 
         # Projection
-        camPoints = self.cam.getWorldPoints()
         figProjection = fig.add_subplot(2, 1, 2)
         figProjection.set_title("Camera View")
         figProjection.set_xlabel("x-axis")
         figProjection.set_ylabel("y-axis")
+        figProjection.set_xlim([-1, 1])
+        figProjection.set_ylim([-1, 1])
 
+        # objPoints = self.obj.getPoints3d() - self.cam.getPoints3d()
         # ax0 = self.set_plots(figure=fig)
         # p = [0,0,0,1]
         # self.draw_arrows(p, Transforms.newBaseMatrix(), ax0)
-        # t = np.linalg.inv(self.cam.getExtrinsicMatrix())
-        # camPoints = np.dot(t, self.obj.getWorldPoints())
-        projection = np.dot(Transforms.newProjectionMatrix(), objPoints)
+        t = np.linalg.inv(self.cam.getExtrinsicMatrix())
+        obj2Cam = np.dot(t, self.obj.getPoints3d())
+        projection = np.dot(Transforms.newProjectionMatrix(), obj2Cam)
         projection = np.dot(self.cam.getIntrinsicMatrix(), projection)
 
-        # Z = projection[2]
-        # projection /= Z
+        Z = projection[2]
+        projection /= Z
 
-        # figProjection.plot(projection[0], projection[1], 'k.')
-        # plt.draw()
-        # plt.pause(0.001)
-        # anim = animation.FuncAnimation(self.fig, self.update, frames=25, interval=50, blit=True)
+        figProjection.plot(projection[0], projection[1], 'k.')
         plt.show()
-        plt.ion()
-        # exit()
 
     @staticmethod
     def draw_arrows(point, base, axis, length=1.5):
         for i in range(len(axis)):
-            axis[i].quiver(point[0],point[1],point[2],base[0][0],base[0][1],base[0][2],color='red',pivot='tail',  length=length)
-            axis[i].quiver(point[0],point[1],point[2],base[1][0],base[1][1],base[1][2],color='green',pivot='tail',  length=length)
-            axis[i].quiver(point[0],point[1],point[2],base[2][0],base[2][1],base[2][2],color='blue',pivot='tail',  length=length)
-            # axis[i].quiver(point[0],point[2],point[1],base[0][0],base[0][2],base[0][1],color='red',pivot='tail',  length=length)
-            # axis[i].quiver(point[0],point[2],point[1],base[2][0],base[2][2],base[2][1],color='blue',pivot='tail',  length=length)
-            # axis[i].quiver(point[0],point[2],point[1],base[1][0],base[1][2],base[1][1],color='green',pivot='tail',  length=length)
-
+            axis[i].quiver(point[0],point[1],point[2],base[0][0],base[0][1], base[0][2],
+                           color='red',pivot='tail', length=length)
+            axis[i].quiver(point[0],point[1],point[2],base[1][0],base[1][1], base[1][2],
+                           color='green',pivot='tail', length=length)
+            axis[i].quiver(point[0],point[1],point[2],base[2][0],base[2][1], base[2][2],
+                           color='blue',pivot='tail', length=length)
+            # axis[i].quiver(point[0],point[2],point[1],base[2][0],base[2][2],base[2][1],
+            # color='blue',pivot='tail',  length=length)
+            # axis[i].quiver(point[0],point[2],point[1],base[1][0],base[1][2],base[1][1],
+            # color='green',pivot='tail',  length=length)
 
     @staticmethod
     # Complementary functions for ploting points and vectors with Y-axis swapped with Z-axis
@@ -159,7 +234,7 @@ class Window:
             if new_axis and naxis > 1:
                 ax.append(figure.add_subplot(1, 2, i+1, projection='3d'))
             else:
-                #ax = plt.axes(projection='3d')
+                # ax = plt.axes(projection='3d')
                 ax.append(figure.add_subplot(1, 1, 1, projection='3d'))
 
             ax[i].set_title("Camera Calibration")

@@ -1,6 +1,5 @@
 # Standard libraries
 import numpy as np
-import matplotlib.pyplot as plt
 from math import cos, sin
 
 
@@ -19,6 +18,15 @@ class Transforms:
     def rotate(self, axis, angle):
         self.rotationMatrix = np.dot(self.newRotationMatrix(axis, angle), self.rotationMatrix)
 
+    def rotateSelf(self, axis, angle):
+        dx = np.mean(self.points[0,:])
+        dy = np.mean(self.points[1,:])
+        dz = np.mean(self.points[2,:])
+        tm = self.newTranslationMatrix(dx, dy, dz)
+        ti = np.linalg.inv(tm)
+        self.rotationMatrix = np.dot(self.newRotationMatrix(axis, angle), ti)
+        self.rotationMatrix = np.dot(tm, self.rotationMatrix)
+
     def getWorldPoints(self):
         return self.points
 
@@ -31,12 +39,11 @@ class Transforms:
     def getTranslationMatrix(self):
         return self.translationMatrix
 
+    def getBaseMatrix(self):
+        return np.dot(self.getRotationMatrix()[0:-1, 0:-1].T, self.newBaseMatrix())
+
     def getExtrinsicMatrix(self):
-        m = self.getRotationMatrix()
-        m[0][-1] = self.translationMatrix[0][-1]
-        m[1][-1] = self.translationMatrix[1][-1]
-        m[2][-1] = self.translationMatrix[2][-1]
-        return m
+        return np.dot(self.getRotationMatrix(), self.getTranslationMatrix())
 
     def getPoints3d(self):
         return np.dot(self.getExtrinsicMatrix(), self.getWorldPoints())
