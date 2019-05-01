@@ -15,44 +15,6 @@ class Window:
         self.obj = object
         self.cam = camera
 
-    def showCamera3d(self, newFig=False):
-
-        fig = self.fig
-
-        if newFig is False:
-            fig = plt.figure()
-
-        quiver_ax = []
-
-        for i in range(2):
-            quiver_ax.append(fig.add_subplot(1,2,i+1,projection='3d'))
-            quiver_ax[i].set_title("reference arrows example")
-            quiver_ax[i].set_xlim([-2,2])
-            quiver_ax[i].set_xlabel("x axis")
-            quiver_ax[i].set_ylim([-2,2])
-            quiver_ax[i].set_ylabel("y axis")
-            quiver_ax[i].set_zlim([-2,2])
-            quiver_ax[i].set_zlabel("z axis")
-            Transforms.set_axes_equal(quiver_ax[i])
-
-        # base vector values
-        e1 = np.array([1, 0, 0])  # X
-        e2 = np.array([0, 1, 0])  # Y
-        e3 = np.array([0, 0, 1])  # Z
-
-        points = self.cam.getPoints3d()
-        # adding quivers to the plot
-
-        for i in range(len(quiver_ax)):
-            quiver_ax[i].quiver(points[0],points[1],points[2],e1,0,0,color='red',pivot='tail',  length=1)
-            quiver_ax[i].quiver(points[0],points[1],points[2],0,e2,0,color='green',pivot='tail',length=1)
-            quiver_ax[i].quiver(points[0],points[1],points[2],0,0,e3,color='blue',pivot='tail', length=1)
-
-        # set camera view options of a plot
-        quiver_ax[1].view_init(elev=90,azim=0)
-        quiver_ax[1].dist = 7
-        plt.show()
-
     def showSTL(self):
 
         fig = plt.figure()
@@ -149,54 +111,38 @@ class Window:
         fig3d.set_zlabel('z-axis')
         fig3d.set_xlim([-3, 3])
         fig3d.set_ylim([-3, 3])
-        fig3d.set_zlim([0, 10])
+        fig3d.set_zlim([0, 8])
 
-        a = []
-        a.append(fig3d)
+        a = [fig3d]
 
         p = []
         p.append(np.mean(self.obj.getPoints3d()[0,:]))
         p.append(np.mean(self.obj.getPoints3d()[1,:]))
         p.append(np.mean(self.obj.getPoints3d()[2,:]))
 
-        # print(p)
-        # fig3d.view_init(elev=25, azim=-65)
+        # Plotting object arrows
         self.draw_arrows(p, self.obj.getBaseMatrix(), a)
         fig3d.plot3D(objPoints[0, :], objPoints[1, :], objPoints[2, :], 'k.')
         Transforms.set_axes_equal(fig3d)
 
-        # self.cam.points = np.array(self.obj.getWorldPoints())
-        # self.cam.points = np.dot(Transforms.newScaleMatrix(0.5,1,1), self.cam.getWorldPoints())
-        # obj3d = np.dot(self.cam.getExtrinsicMatrix(), self.cam.getWorldPoints())
-
-        # ax0 = self.set_plots()
         p = []
-        # p.append(np.mean(self.cam.getPoints3d()[0,:]))
-        # p.append(np.mean(self.cam.getPoints3d()[1,:]))
-        # p.append(np.mean(self.cam.getPoints3d()[2,:]))
-
         p.append(self.cam.getPoints3d()[0])
         p.append(self.cam.getPoints3d()[1])
         p.append(self.cam.getPoints3d()[2])
 
+        # Plotting camera arrows
         self.draw_arrows(p, self.cam.getBaseMatrix(), a)
-        # OLHAR DIRECAO DO GIRO
-        # fig3d.plot3D(obj3d[0, :], obj3d[1, :], obj3d[2, :], 'c.')
 
         # Projection
         figProjection = fig.add_subplot(2, 1, 2)
         figProjection.set_title("Camera View")
         figProjection.set_xlabel("x-axis")
         figProjection.set_ylabel("y-axis")
-        figProjection.set_xlim([-1, 1])
+        figProjection.set_xlim([-2, 2])
         figProjection.set_ylim([-1, 1])
+        figProjection.set_aspect('equal')
 
-        # objPoints = self.obj.getPoints3d() - self.cam.getPoints3d()
-        # ax0 = self.set_plots(figure=fig)
-        # p = [0,0,0,1]
-        # self.draw_arrows(p, Transforms.newBaseMatrix(), ax0)
-        t = np.linalg.inv(self.cam.getExtrinsicMatrix())
-        obj2Cam = np.dot(t, self.obj.getPoints3d())
+        obj2Cam = np.dot(self.cam.getExtrinsicMatrix(), self.obj.getPoints3d())
         projection = np.dot(Transforms.newProjectionMatrix(), obj2Cam)
         projection = np.dot(self.cam.getIntrinsicMatrix(), projection)
 

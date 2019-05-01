@@ -25,9 +25,6 @@ O trabalho poderá ser feito em dupla e deverá ser entregue/apresentado até o 
 
 Vocês deverão enviar o trabalho para raquel@ele.ufes.br até a data prevista e agendar a apresentação.'''
 
-# GridSpec
-# https://matplotlib.org/users/gridspec.html
-
 if __name__ == "__main__":
 
     obj = Object()

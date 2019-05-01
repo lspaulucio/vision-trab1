@@ -9,23 +9,26 @@ class Transforms:
         self.points = points
         self.rotationMatrix = self.newRotationMatrix('z', 0)
         self.translationMatrix = self.newTranslationMatrix(0, 0, 0)
+        self.baseMatrix = self.newBaseMatrix()
 
     def translate(self, dx=0, dy=0, dz=0):
         self.translationMatrix[0][-1] += dx
         self.translationMatrix[1][-1] += dy
         self.translationMatrix[2][-1] += dz
+        self.points = np.dot(self.newTranslationMatrix(dx, dy, dz), self.points)
 
     def rotate(self, axis, angle):
         self.rotationMatrix = np.dot(self.newRotationMatrix(axis, angle), self.rotationMatrix)
+        self.points = np.dot(self.newRotationMatrix(axis, angle), self.points)
 
     def rotateSelf(self, axis, angle):
-        dx = np.mean(self.points[0,:])
-        dy = np.mean(self.points[1,:])
-        dz = np.mean(self.points[2,:])
-        tm = self.newTranslationMatrix(dx, dy, dz)
-        ti = np.linalg.inv(tm)
-        self.rotationMatrix = np.dot(self.newRotationMatrix(axis, angle), ti)
-        self.rotationMatrix = np.dot(tm, self.rotationMatrix)
+        xc = np.mean(self.getWorldPoints()[0,:])
+        yc = np.mean(self.getWorldPoints()[1,:])
+        zc = np.mean(self.getWorldPoints()[2,:])
+        self.baseMatrix = np.dot(self.newRotationMatrix(axis, angle)[0:-1, 0:-1], self.baseMatrix)
+        m = np.dot(self.newRotationMatrix(axis, angle), self.newTranslationMatrix(-xc, -yc, -zc))
+        m = np.dot(self.newTranslationMatrix(xc, yc, zc), m)
+        self.setWorldPoints(np.dot(m, self.points))
 
     def getWorldPoints(self):
         return self.points
@@ -40,13 +43,14 @@ class Transforms:
         return self.translationMatrix
 
     def getBaseMatrix(self):
-        return np.dot(self.getRotationMatrix()[0:-1, 0:-1].T, self.newBaseMatrix())
+        return np.dot(self.getRotationMatrix()[0:-1, 0:-1], self.baseMatrix)
 
     def getExtrinsicMatrix(self):
         return np.dot(self.getRotationMatrix(), self.getTranslationMatrix())
 
     def getPoints3d(self):
-        return np.dot(self.getExtrinsicMatrix(), self.getWorldPoints())
+        # return np.dot(self.getExtrinsicMatrix(), self.getWorldPoints())
+        return self.points
 
     @staticmethod
     def newBaseMatrix():
