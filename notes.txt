@@ -4,3 +4,87 @@ tKinter
 https://stackoverflow.com/questions/12904912/how-to-set-camera-position-for-3d-plots-using-python-matplotlib
 # GridSpec
 # https://matplotlib.org/users/gridspec.html
+
+
+def showSTL(self):
+
+    fig = self.fig
+
+    # Plotting object and camera in the world
+    # objPoints = self.obj.getPoints3d()
+    fig3d = fig.add_subplot(2, 1, 1, projection='3d')
+    fig3d.set_title('3D World')
+    fig3d.set_xlabel('x-axis')
+    fig3d.set_ylabel('y-axis')
+    fig3d.set_zlabel('z-axis')
+    # fig3d.set_xlim([-3, 3])
+    # fig3d.set_ylim([-3, 3])
+    # fig3d.set_zlim([0, 10])
+
+    a = []
+    a.append(fig3d)
+
+    p = []
+    p.append(np.mean(self.obj.getPoints3d()[0,:]))
+    p.append(np.mean(self.obj.getPoints3d()[1,:]))
+    p.append(np.mean(self.obj.getPoints3d()[2,:]))
+
+    # fig3d.view_init(elev=25, azim=-65)
+    self.draw_arrows(p, self.obj.getBaseMatrix(), a)
+
+    # Plot and render the faces of the object
+    fig3d.add_collection3d(art3d.Poly3DCollection(self.obj.vectors))
+    # Plot the contours of the faces of the object
+    fig3d.add_collection3d(art3d.Line3DCollection(self.obj.vectors, color='k', linewidths=0.2, linestyles='-'))
+    # Plot the vertices of the object
+    # axes1.plot(kong[0,:],kong[1,:],kong[2,:],'k.')
+
+    points = self.obj.getPoints3d()
+
+    # Set axes and their aspect
+    fig3d.auto_scale_xyz(points[0, :], points[1, :], points[2, :])
+    # Show the plots
+    # fig3d.plot3D(objPoints[0, :], objPoints[1, :], objPoints[2, :], 'k.')
+    Transforms.set_axes_equal(fig3d)
+
+    # self.cam.points = np.array(self.obj.getWorldPoints())
+    # self.cam.points = np.dot(Transforms.newScaleMatrix(0.5,1,1), self.cam.getWorldPoints())
+    # obj3d = np.dot(self.cam.getExtrinsicMatrix(), self.cam.getWorldPoints())
+
+    # ax0 = self.set_plots()
+    p = []
+    # p.append(np.mean(self.cam.getPoints3d()[0,:]))
+    # p.append(np.mean(self.cam.getPoints3d()[1,:]))
+    # p.append(np.mean(self.cam.getPoints3d()[2,:]))
+
+    p.append(self.cam.getPoints3d()[0])
+    p.append(self.cam.getPoints3d()[1])
+    p.append(self.cam.getPoints3d()[2])
+
+    self.draw_arrows(p, self.cam.getBaseMatrix(), a)
+    # OLHAR DIRECAO DO GIRO
+    # fig3d.plot3D(obj3d[0, :], obj3d[1, :], obj3d[2, :], 'c.')
+
+    # Projection
+    figProjection = fig.add_subplot(2, 1, 2)
+    figProjection.set_title("Camera View")
+    figProjection.set_xlabel("x-axis")
+    figProjection.set_ylabel("y-axis")
+    figProjection.set_xlim([-1, 1])
+    figProjection.set_ylim([-1, 1])
+
+    # objPoints = self.obj.getPoints3d() - self.cam.getPoints3d()
+    # ax0 = self.set_plots(figure=fig)
+    # p = [0,0,0,1]
+    # self.draw_arrows(p, Transforms.newBaseMatrix(), ax0)
+    t = np.linalg.inv(self.cam.getExtrinsicMatrix())
+    obj2Cam = np.dot(t, self.obj.getPoints3d())
+    projection = np.dot(Transforms.newProjectionMatrix(), obj2Cam)
+    projection = np.dot(self.cam.getIntrinsicMatrix(), projection)
+
+    Z = projection[2]
+    projection /= Z
+
+    figProjection.plot(projection[0], projection[1], 'k')
+    plt.show()
+    plt.ion()

@@ -1,6 +1,5 @@
 # Standard libraries
 import numpy as np
-import matplotlib.pyplot as plt
 
 # My libraries
 from Transforms import Transforms
@@ -12,7 +11,7 @@ class Camera(Transforms):
     """
 
     def __init__(self):
-        super().__init__(np.array([[0], [0], [1], [1]]))
+        super().__init__(np.array([[0], [0], [0], [1]]))
         self.f = 1
         self.sx = 1
         self.sy = 1

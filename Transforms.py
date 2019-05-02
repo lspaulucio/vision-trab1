@@ -1,34 +1,28 @@
 # Standard libraries
 import numpy as np
 from math import cos, sin
+import matplotlib.pyplot as plt
 
 
 class Transforms:
 
     def __init__(self, points):
         self.points = points
-        self.rotationMatrix = self.newRotationMatrix('z', 0)
-        self.translationMatrix = self.newTranslationMatrix(0, 0, 0)
-        self.baseMatrix = self.newBaseMatrix()
+        self.extrinsicMatrix = self.newRotationMatrix('z', 0)
 
     def translate(self, dx=0, dy=0, dz=0):
-        self.translationMatrix[0][-1] += dx
-        self.translationMatrix[1][-1] += dy
-        self.translationMatrix[2][-1] += dz
-        self.points = np.dot(self.newTranslationMatrix(dx, dy, dz), self.points)
+        self.extrinsicMatrix = np.dot(self.newTranslationMatrix(dx, dy, dz), self.extrinsicMatrix)
 
     def rotate(self, axis, angle):
-        self.rotationMatrix = np.dot(self.newRotationMatrix(axis, angle), self.rotationMatrix)
-        self.points = np.dot(self.newRotationMatrix(axis, angle), self.points)
+        self.extrinsicMatrix = np.dot(self.newRotationMatrix(axis, angle), self.extrinsicMatrix)
 
     def rotateSelf(self, axis, angle):
-        xc = np.mean(self.getWorldPoints()[0,:])
-        yc = np.mean(self.getWorldPoints()[1,:])
-        zc = np.mean(self.getWorldPoints()[2,:])
-        self.baseMatrix = np.dot(self.newRotationMatrix(axis, angle)[0:-1, 0:-1], self.baseMatrix)
+        xc = np.mean(self.getPoints3d()[0, :])
+        yc = np.mean(self.getPoints3d()[1, :])
+        zc = np.mean(self.getPoints3d()[2, :])
         m = np.dot(self.newRotationMatrix(axis, angle), self.newTranslationMatrix(-xc, -yc, -zc))
         m = np.dot(self.newTranslationMatrix(xc, yc, zc), m)
-        self.setWorldPoints(np.dot(m, self.points))
+        self.extrinsicMatrix = np.dot(m, self.extrinsicMatrix)
 
     def getWorldPoints(self):
         return self.points
@@ -43,14 +37,13 @@ class Transforms:
         return self.translationMatrix
 
     def getBaseMatrix(self):
-        return np.dot(self.getRotationMatrix()[0:-1, 0:-1], self.baseMatrix)
+        return self.extrinsicMatrix[0:-1, 0:-1].T
 
     def getExtrinsicMatrix(self):
-        return np.dot(self.getRotationMatrix(), self.getTranslationMatrix())
+        return self.extrinsicMatrix
 
     def getPoints3d(self):
-        # return np.dot(self.getExtrinsicMatrix(), self.getWorldPoints())
-        return self.points
+        return np.dot(self.getExtrinsicMatrix(), self.getWorldPoints())
 
     @staticmethod
     def newBaseMatrix():
@@ -130,3 +123,43 @@ class Transforms:
         axis.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
         axis.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
         axis.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
+
+    @staticmethod
+    def draw_arrows(point, base, axis, length=1.5):
+        for i in range(len(axis)):
+            axis[i].quiver(point[0], point[1], point[2], base[0][0], base[0][1], base[0][2],
+                           color='red', pivot='tail', length=length)
+            axis[i].quiver(point[0], point[1], point[2], base[1][0], base[1][1], base[1][2],
+                           color='green', pivot='tail', length=length)
+            axis[i].quiver(point[0], point[1], point[2], base[2][0], base[2][1], base[2][2],
+                           color='blue', pivot='tail', length=length)
+            # axis[i].quiver(point[0],point[2],point[1],base[2][0],base[2][2],base[2][1],
+            # color='blue',pivot='tail',  length=length)
+            # axis[i].quiver(point[0],point[2],point[1],base[1][0],base[1][2],base[1][1],
+            # color='green',pivot='tail',  length=length)
+
+    @staticmethod
+    # Complementary functions for ploting points and vectors with Y-axis swapped with Z-axis
+    def set_plots(ax=None, figure=None, figsize=(9, 8), limx=[-2, 2], limy=[-2, 2], limz=[-2, 2], naxis=1):
+        if figure is None:
+            figure = plt.figure(figsize=(9, 8))
+        if ax is None:
+            ax = []
+            new_axis = True
+        else:
+            new_axis = False
+        for i in range(naxis):
+            if new_axis and naxis > 1:
+                ax.append(figure.add_subplot(1, 2, i+1, projection='3d'))
+            else:
+                # ax = plt.axes(projection='3d')
+                ax.append(figure.add_subplot(1, 1, 1, projection='3d'))
+
+            ax[i].set_title("Camera Calibration")
+            ax[i].set_xlim(limx)
+            ax[i].set_xlabel("x axis")
+            ax[i].set_ylim(limy)
+            ax[i].set_ylabel("z axis")
+            ax[i].set_zlim(limz)
+            ax[i].set_zlabel("y axis")
+        return ax
