@@ -165,6 +165,7 @@ class Window():
         self.fig.canvas.mpl_connect('key_press_event', keyEventHandler)
         plt.show()
 
+
 if __name__ == "__main__":
     obj = Object()
     obj.loadFile('box.xyz')
