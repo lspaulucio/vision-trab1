@@ -79,9 +79,9 @@ class Window():
         projection = np.dot(Transforms.newProjectionMatrix(), obj2Cam)
         projection = np.dot(cam.getIntrinsicMatrix(), projection)
 
-        id = projection[2, :] > 0
+        indexes = projection[2, :] > 0
         # print(idx.shape)
-        projection = projection[:, id]
+        projection = projection[:, indexes]
         Z = projection[2]
         projection /= Z
 
