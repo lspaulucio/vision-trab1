@@ -3,6 +3,7 @@ import sys
 import numpy as np
 from math import pi
 from stl import mesh
+from enum import Enum
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import art3d
 from matplotlib.widgets import RadioButtons, Slider
@@ -12,6 +13,11 @@ from Camera import Camera
 from Object import Object
 from Transforms import Transforms
 
+class tfType(Enum):
+    TRANSLATE = 1
+    ROTATE = 2
+    ROTATE_OWN_AXIS = 3
+    TRANSLATE_OWN_AXIS = 4
 
 class Window():
 
@@ -23,7 +29,7 @@ class Window():
         self.cam = cam
         self.elementSelected = self.obj
         self.axisSelected = 'z'
-        self.transformSelected = 1
+        self.transformSelected = tfType.TRANSLATE
 
     def update(self):
         self.fig3d.cla()
@@ -90,7 +96,7 @@ class Window():
         # plt.axes = left, bottom, width, height - position
         objectButton = RadioButtons(plt.axes([0.0, 0.9, 0.17, 0.1]), ('Camera', 'Object'), active=1)
         axisButton = RadioButtons(plt.axes([0.0, 0.8, 0.17, 0.1]), ('x', 'y', 'z'), active=2)
-        transformButton = RadioButtons(plt.axes([0.0, 0.7, 0.17, 0.1]), ('Translate', 'Rotate', 'Rotate Own Axis'), active=0)
+        transformButton = RadioButtons(plt.axes([0.0, 0.7, 0.17, 0.1]), ('Translate', 'Rotate', 'Rotate Own Axis', 'Translate Own Axis'), active=0)
         focalDistance = Slider(plt.axes([0.15, 0.01, 0.3, 0.02]), 'Focal Distance', 1.0, 50.0, valinit=1.0, valstep=1)
         mpX = Slider(plt.axes([0.15, 0.05, 0.3, 0.02]), 'Ox', -3.0, 3.0, valinit=0.0, valstep=0.5)
         mpY = Slider(plt.axes([0.15, 0.03, 0.3, 0.02]), 'Oy', -3.0, 3.0, valinit=0.0, valstep=0.5)
@@ -126,7 +132,11 @@ class Window():
         axisButton.on_clicked(axisSelection)
 
         def transformSelection(label):
-            transformDict = {'Translate': 1, 'Rotate': 2, 'Rotate Own Axis': 3}
+            transformDict = {'Translate': tfType.TRANSLATE,
+                             'Rotate': tfType.ROTATE,
+                             'Rotate Own Axis': tfType.ROTATE_OWN_AXIS,
+                             'Translate Own Axis': tfType.TRANSLATE_OWN_AXIS}
+
             self.transformSelected = transformDict[label]
 
         transformButton.on_clicked(transformSelection)
@@ -144,20 +154,24 @@ class Window():
                 dx, dy, dz = 0, 0, T_STEP
 
             if event.key == 'up' or event.key == 'right':
-                if self.transformSelected == 1:
+                if self.transformSelected == tfType.TRANSLATE:
                     self.elementSelected.translate(dx, dy, dz)
-                elif self.transformSelected == 2:
+                elif self.transformSelected == tfType.ROTATE:
                     self.elementSelected.rotate(self.axisSelected, R_STEP)
-                elif self.transformSelected == 3:
+                elif self.transformSelected == tfType.ROTATE_OWN_AXIS:
                     self.elementSelected.rotateSelf(self.axisSelected, R_STEP)
+                elif self.transformSelected == tfType.TRANSLATE_OWN_AXIS:
+                    self.elementSelected.translateSelf(dx, dy, dz)
 
             elif event.key == 'down' or event.key == 'left':
-                if self.transformSelected == 1:
+                if self.transformSelected == tfType.TRANSLATE:
                     self.elementSelected.translate(-dx, -dy, -dz)
-                elif self.transformSelected == 2:
+                elif self.transformSelected == tfType.ROTATE:
                     self.elementSelected.rotate(self.axisSelected, -R_STEP)
-                elif self.transformSelected == 3:
+                elif self.transformSelected == tfType.ROTATE_OWN_AXIS:
                     self.elementSelected.rotateSelf(self.axisSelected, -R_STEP)
+                elif self.transformSelected == tfType.TRANSLATE_OWN_AXIS:
+                    self.elementSelected.translateSelf(-dx, -dy, -dz)
 
             self.update()
 
@@ -169,7 +183,6 @@ class Window():
 if __name__ == "__main__":
     obj = Object()
     obj.loadFile('box.xyz')
-    # obj.setWorldPoints(np.array([[0], [0], [5], [1]]))
     cam = Camera()
 
     w = Window(cam, obj)

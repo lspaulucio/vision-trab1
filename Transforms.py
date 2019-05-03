@@ -13,6 +13,11 @@ class Transforms:
     def translate(self, dx=0, dy=0, dz=0):
         self.extrinsicMatrix = np.dot(self.newTranslationMatrix(dx, dy, dz), self.extrinsicMatrix)
 
+    def translateSelf(self, dx=0, dy=0, dz=0):
+        vt = np.dot(self.getBaseMatrix(), np.array([[dx], [dy], [dz]]))
+        dx, dy, dz = vt[0][0], vt[1][0], vt[2][0]
+        self.extrinsicMatrix = np.dot(self.newTranslationMatrix(dx, dy, dz), self.extrinsicMatrix)
+
     def rotate(self, axis, angle):
         self.extrinsicMatrix = np.dot(self.newRotationMatrix(axis, angle), self.extrinsicMatrix)
 
