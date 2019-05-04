@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+
+""" Aluno: Leonardo Santos Paulucio
+    Data: 06/05/19
+    Trabalho 1 de Visão Computacional"""
+
 # My libraries
 from Object import Object
 from Camera import Camera

@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+
+""" Aluno: Leonardo Santos Paulucio
+    Data: 06/05/19
+    Trabalho 1 de Visão Computacional"""
+
 # Standard libraries
 import numpy as np
 from math import cos, sin
@@ -5,6 +11,7 @@ import matplotlib.pyplot as plt
 
 
 class Transforms:
+    """Class of 3d transforms"""
 
     def __init__(self, points):
         self.points = points
@@ -13,15 +20,15 @@ class Transforms:
     def translate(self, dx=0, dy=0, dz=0):
         self.extrinsicMatrix = np.dot(self.newTranslationMatrix(dx, dy, dz), self.extrinsicMatrix)
 
-    def translateSelf(self, dx=0, dy=0, dz=0):
-        vt = np.dot(self.getBaseMatrix(), np.array([[dx], [dy], [dz]]))
+    def translateOwnAxis(self, dx=0, dy=0, dz=0):
+        vt = np.dot(self.extrinsicMatrix[0:-1, 0:-1], np.array([[dx], [dy], [dz]]))
         dx, dy, dz = vt[0][0], vt[1][0], vt[2][0]
         self.extrinsicMatrix = np.dot(self.newTranslationMatrix(dx, dy, dz), self.extrinsicMatrix)
 
     def rotate(self, axis, angle):
         self.extrinsicMatrix = np.dot(self.newRotationMatrix(axis, angle), self.extrinsicMatrix)
 
-    def rotateSelf(self, axis, angle):
+    def rotateOwnCenter(self, axis, angle):
         xc = np.mean(self.getPoints3d()[0, :])
         yc = np.mean(self.getPoints3d()[1, :])
         zc = np.mean(self.getPoints3d()[2, :])
@@ -138,10 +145,6 @@ class Transforms:
                            color='green', pivot='tail', length=length)
             axis[i].quiver(point[0], point[1], point[2], base[2][0], base[2][1], base[2][2],
                            color='blue', pivot='tail', length=length)
-            # axis[i].quiver(point[0],point[2],point[1],base[2][0],base[2][2],base[2][1],
-            # color='blue',pivot='tail',  length=length)
-            # axis[i].quiver(point[0],point[2],point[1],base[1][0],base[1][2],base[1][1],
-            # color='green',pivot='tail',  length=length)
 
     @staticmethod
     # Complementary functions for ploting points and vectors with Y-axis swapped with Z-axis

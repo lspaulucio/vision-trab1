@@ -1,8 +1,13 @@
+# -*- coding: utf-8 -*-
+
+""" Aluno: Leonardo Santos Paulucio
+    Data: 06/05/19
+    Trabalho 1 de Visão Computacional"""
+
 # Standard libraries
 import sys
 import numpy as np
 from math import pi
-from stl import mesh
 from enum import Enum
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import art3d
@@ -13,13 +18,16 @@ from Camera import Camera
 from Object import Object
 from Transforms import Transforms
 
+
 class tfType(Enum):
     TRANSLATE = 1
     ROTATE = 2
-    ROTATE_OWN_AXIS = 3
+    ROTATE_OWN_CENTER = 3
     TRANSLATE_OWN_AXIS = 4
 
+
 class Window():
+    """ Class Window that show object and camera in the world"""
 
     def __init__(self, cam, obj):
         self.fig = plt.figure()
@@ -92,12 +100,15 @@ class Window():
         # plt.pause(0.001)
 
     def show(self):
+
+        # Creating user interface
+
         # Creating widgets
-        # plt.axes = left, bottom, width, height - position
+        # plt.axes = left, bottom, width, height - box position
         objectButton = RadioButtons(plt.axes([0.0, 0.9, 0.17, 0.1]), ('Camera', 'Object'), active=1)
         axisButton = RadioButtons(plt.axes([0.0, 0.8, 0.17, 0.1]), ('x', 'y', 'z'), active=2)
-        transformButton = RadioButtons(plt.axes([0.0, 0.7, 0.17, 0.1]), ('Translate', 'Rotate', 'Rotate Own Axis', 'Translate Own Axis'), active=0)
-        focalDistance = Slider(plt.axes([0.15, 0.01, 0.3, 0.02]), 'Focal Distance', 1.0, 50.0, valinit=1.0, valstep=1)
+        transformButton = RadioButtons(plt.axes([0.0, 0.7, 0.17, 0.1]), ('Translate', 'Rotate', 'Rotate Own Center', 'Translate Own Axis'), active=0)
+        focalDistance = Slider(plt.axes([0.15, 0.01, 0.3, 0.02]), 'Focal Distance', 1.0, 50.0, valinit=1.0, valstep=0.5)
         mpX = Slider(plt.axes([0.15, 0.05, 0.3, 0.02]), 'Ox', -3.0, 3.0, valinit=0.0, valstep=0.5)
         mpY = Slider(plt.axes([0.15, 0.03, 0.3, 0.02]), 'Oy', -3.0, 3.0, valinit=0.0, valstep=0.5)
         scaleX = Slider(plt.axes([0.6, 0.05, 0.3, 0.02]), 'Sx', -10.0, 10.0, valinit=1.0, valstep=1)
@@ -134,7 +145,7 @@ class Window():
         def transformSelection(label):
             transformDict = {'Translate': tfType.TRANSLATE,
                              'Rotate': tfType.ROTATE,
-                             'Rotate Own Axis': tfType.ROTATE_OWN_AXIS,
+                             'Rotate Own Center': tfType.ROTATE_OWN_CENTER,
                              'Translate Own Axis': tfType.TRANSLATE_OWN_AXIS}
 
             self.transformSelected = transformDict[label]
@@ -142,6 +153,8 @@ class Window():
         transformButton.on_clicked(transformSelection)
 
         def keyEventHandler(event):
+            """Function that waits for keyboard events"""
+
             sys.stdout.flush()
             T_STEP = 0.5
             R_STEP = pi/6
@@ -158,22 +171,24 @@ class Window():
                     self.elementSelected.translate(dx, dy, dz)
                 elif self.transformSelected == tfType.ROTATE:
                     self.elementSelected.rotate(self.axisSelected, R_STEP)
-                elif self.transformSelected == tfType.ROTATE_OWN_AXIS:
-                    self.elementSelected.rotateSelf(self.axisSelected, R_STEP)
+                elif self.transformSelected == tfType.ROTATE_OWN_CENTER:
+                    self.elementSelected.rotateOwnCenter(self.axisSelected, R_STEP)
                 elif self.transformSelected == tfType.TRANSLATE_OWN_AXIS:
-                    self.elementSelected.translateSelf(dx, dy, dz)
+                    self.elementSelected.translateOwnAxis(dx, dy, dz)
 
             elif event.key == 'down' or event.key == 'left':
                 if self.transformSelected == tfType.TRANSLATE:
                     self.elementSelected.translate(-dx, -dy, -dz)
                 elif self.transformSelected == tfType.ROTATE:
                     self.elementSelected.rotate(self.axisSelected, -R_STEP)
-                elif self.transformSelected == tfType.ROTATE_OWN_AXIS:
-                    self.elementSelected.rotateSelf(self.axisSelected, -R_STEP)
+                elif self.transformSelected == tfType.ROTATE_OWN_CENTER:
+                    self.elementSelected.rotateOwnCenter(self.axisSelected, -R_STEP)
                 elif self.transformSelected == tfType.TRANSLATE_OWN_AXIS:
-                    self.elementSelected.translateSelf(-dx, -dy, -dz)
+                    self.elementSelected.translateOwnAxis(-dx, -dy, -dz)
 
             self.update()
+
+        # End of interface
 
         self.update()
         self.fig.canvas.mpl_connect('key_press_event', keyEventHandler)
