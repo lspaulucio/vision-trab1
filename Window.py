@@ -24,6 +24,7 @@ class tfType(Enum):
     ROTATE = 2
     ROTATE_OWN_CENTER = 3
     TRANSLATE_OWN_AXIS = 4
+    ROTATE_OWN_AXIS = 5
 
 
 class Window():
@@ -107,7 +108,7 @@ class Window():
         # plt.axes = left, bottom, width, height - box position
         objectButton = RadioButtons(plt.axes([0.0, 0.9, 0.17, 0.1]), ('Camera', 'Object'), active=1)
         axisButton = RadioButtons(plt.axes([0.0, 0.8, 0.17, 0.1]), ('x', 'y', 'z'), active=2)
-        transformButton = RadioButtons(plt.axes([0.0, 0.7, 0.17, 0.1]), ('Translate', 'Rotate', 'Rotate Own Center', 'Translate Own Axis'), active=0)
+        transformButton = RadioButtons(plt.axes([0.0, 0.7, 0.17, 0.1]), ('Translate', 'Rotate', 'Rotate Own Center', 'Translate Own Axis', 'Rotate Own Axis'), active=0)
         focalDistance = Slider(plt.axes([0.15, 0.01, 0.3, 0.02]), 'Focal Distance', 1.0, 50.0, valinit=1.0, valstep=0.5)
         mpX = Slider(plt.axes([0.15, 0.05, 0.3, 0.02]), 'Ox', -3.0, 3.0, valinit=0.0, valstep=0.5)
         mpY = Slider(plt.axes([0.15, 0.03, 0.3, 0.02]), 'Oy', -3.0, 3.0, valinit=0.0, valstep=0.5)
@@ -146,7 +147,8 @@ class Window():
             transformDict = {'Translate': tfType.TRANSLATE,
                              'Rotate': tfType.ROTATE,
                              'Rotate Own Center': tfType.ROTATE_OWN_CENTER,
-                             'Translate Own Axis': tfType.TRANSLATE_OWN_AXIS}
+                             'Translate Own Axis': tfType.TRANSLATE_OWN_AXIS,
+                             'Rotate Own Axis': tfType.ROTATE_OWN_AXIS}
 
             self.transformSelected = transformDict[label]
 
@@ -175,6 +177,8 @@ class Window():
                     self.elementSelected.rotateOwnCenter(self.axisSelected, R_STEP)
                 elif self.transformSelected == tfType.TRANSLATE_OWN_AXIS:
                     self.elementSelected.translateOwnAxis(dx, dy, dz)
+                elif self.transformSelected == tfType.ROTATE_OWN_AXIS:
+                    self.elementSelected.rotateOwnAxis(self.axisSelected, R_STEP)
 
             elif event.key == 'down' or event.key == 'left':
                 if self.transformSelected == tfType.TRANSLATE:
@@ -185,6 +189,8 @@ class Window():
                     self.elementSelected.rotateOwnCenter(self.axisSelected, -R_STEP)
                 elif self.transformSelected == tfType.TRANSLATE_OWN_AXIS:
                     self.elementSelected.translateOwnAxis(-dx, -dy, -dz)
+                elif self.transformSelected == tfType.ROTATE_OWN_AXIS:
+                    self.elementSelected.rotateOwnAxis(self.axisSelected, -R_STEP)
 
             self.update()
 

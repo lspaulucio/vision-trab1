@@ -36,17 +36,19 @@ class Transforms:
         m = np.dot(self.newTranslationMatrix(xc, yc, zc), m)
         self.extrinsicMatrix = np.dot(m, self.extrinsicMatrix)
 
+    def rotateOwnAxis(self, axis, angle):
+        xc = np.mean(self.getWorldPoints()[0, :])
+        yc = np.mean(self.getWorldPoints()[1, :])
+        zc = np.mean(self.getWorldPoints()[2, :])
+        m = np.dot(self.newRotationMatrix(axis, angle), self.newTranslationMatrix(-xc, -yc, -zc))
+        m = np.dot(self.newTranslationMatrix(xc, yc, zc), m)
+        self.extrinsicMatrix = np.dot(self.extrinsicMatrix, m)
+
     def getWorldPoints(self):
         return self.points
 
     def setWorldPoints(self, pts):
         self.points = pts
-
-    def getRotationMatrix(self):
-        return self.rotationMatrix
-
-    def getTranslationMatrix(self):
-        return self.translationMatrix
 
     def getBaseMatrix(self):
         return self.extrinsicMatrix[0:-1, 0:-1].T
