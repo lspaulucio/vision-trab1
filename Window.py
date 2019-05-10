@@ -106,9 +106,13 @@ class Window():
 
         # Creating widgets
         # plt.axes = left, bottom, width, height - box position
-        objectButton = RadioButtons(plt.axes([0.0, 0.9, 0.17, 0.1]), ('Camera', 'Object'), active=1)
-        axisButton = RadioButtons(plt.axes([0.0, 0.8, 0.17, 0.1]), ('x', 'y', 'z'), active=2)
-        transformButton = RadioButtons(plt.axes([0.0, 0.7, 0.17, 0.1]), ('Translate', 'Rotate', 'Rotate Own Center', 'Translate Own Axis', 'Rotate Own Axis'), active=0)
+        objectButton = RadioButtons(plt.axes([0.0, 0.8, 0.17, 0.2]), ('Camera', 'Object'), active=1)
+        transformButton = RadioButtons(plt.axes([0.0, 0.6, 0.17, 0.2]), ('Translate',
+                                                                         'Rotate',
+                                                                         'Rotate Own Center',
+                                                                         'Translate Own Axis',
+                                                                         'Rotate Own Axis'), active=0)
+        axisButton = RadioButtons(plt.axes([0.0, 0.4, 0.17, 0.2]), ('x', 'y', 'z'), active=2)
         focalDistance = Slider(plt.axes([0.15, 0.01, 0.3, 0.02]), 'Focal Distance', 1.0, 50.0, valinit=1.0, valstep=0.5)
         mpX = Slider(plt.axes([0.15, 0.05, 0.3, 0.02]), 'Ox', -3.0, 3.0, valinit=0.0, valstep=0.5)
         mpY = Slider(plt.axes([0.15, 0.03, 0.3, 0.02]), 'Oy', -3.0, 3.0, valinit=0.0, valstep=0.5)
