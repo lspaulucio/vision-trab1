@@ -9,6 +9,7 @@ import sys
 import numpy as np
 from math import pi
 from enum import Enum
+from copy import deepcopy
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import art3d
 from matplotlib.widgets import RadioButtons, Slider
@@ -50,20 +51,37 @@ class Window():
         self.fig3d.set_ylim([-3, 3])
         self.fig3d.set_zlim([0, 8])
 
-        objPoints = self.obj.getPoints3d()
         cam = self.cam
         obj = self.obj
+        objPoints = self.obj.getPoints3d()
         a = [self.fig3d]
-
+        arrow_length = 1.5
         p = []
         p.append(np.mean(self.obj.getPoints3d()[0, :]))
         p.append(np.mean(self.obj.getPoints3d()[1, :]))
         p.append(np.mean(self.obj.getPoints3d()[2, :]))
 
+        if obj.isSTL():
+            self.fig3d.set_xlim([-50, 50])
+            self.fig3d.set_ylim([-50, 50])
+            self.fig3d.set_zlim([0, 100])
+            obj_mesh = deepcopy(obj.mesh)
+            obj_mesh.transform(obj.getExtrinsicMatrix())
+            # Get the vectors that define the triangular faces that form the 3D object
+            kong_vectors = obj_mesh.vectors
+            # Plot and render the faces of the object
+            self.fig3d.add_collection3d(art3d.Poly3DCollection(kong_vectors))
+            # Plot the contours of the faces of the object
+            self.fig3d.add_collection3d(art3d.Line3DCollection(kong_vectors, colors='k', linewidths=0.2, linestyles='-'))
+            # Set axes and their aspect
+            self.fig3d.auto_scale_xyz(objPoints[0,:], objPoints[1,:], objPoints[2,:])
+            arrow_length = 100
+
         # Plotting object arrows
-        Transforms.draw_arrows(p, obj.getBaseMatrix(), a)
+        Transforms.draw_arrows(p, obj.getBaseMatrix(), a, length=arrow_length)
+        # Plot the vertices of the object
         self.fig3d.plot3D(objPoints[0, :], objPoints[1, :], objPoints[2, :], 'k.')
-        Transforms.set_axes_equal(self.fig3d)
+        # Transforms.set_axes_equal(self.fig3d)
 
         p = []
         p.append(cam.getPoints3d()[0])
@@ -72,7 +90,7 @@ class Window():
 
         # Plotting camera arrows
         camPoints = cam.getPoints3d()
-        Transforms.draw_arrows(p, cam.getBaseMatrix(), a)
+        Transforms.draw_arrows(p, cam.getBaseMatrix(), a, length=arrow_length/5)
         self.fig3d.plot3D(camPoints[0, :], camPoints[1, :], camPoints[2, :], 'k.')
 
         # Projection

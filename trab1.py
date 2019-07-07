@@ -4,6 +4,9 @@
     Data: 06/05/19
     Trabalho 1 de Visão Computacional"""
 
+import argparse
+import textwrap
+
 # My libraries
 from Object import Object
 from Camera import Camera
@@ -30,8 +33,29 @@ Vocês deverão enviar o trabalho para raquel@ele.ufes.br até a data prevista e
 
 
 if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser(prog="python trab1.py",
+                                     formatter_class=argparse.RawDescriptionHelpFormatter,
+                                     description=textwrap.dedent('''\
+    Trabalho 1 de Visão Computacional - Transformações 3D e Projeção de Câmera
+
+    Ex: Normal file: python trab1.py -f box.xyz (Default)
+    Ex: STL file:    python trab1.py --stl -f models/mario.STL
+    '''))
+
+    parser.add_argument('--stl', '-s', action="store_true", dest="stl", default=False, required=False,
+                        help='Use this flag if object file is stl')
+    parser.add_argument('--file', '-f', default='box.xyz', dest='file',
+                        help='Object file location')
+
+    args = parser.parse_args()
+
     obj = Object()
-    obj.loadFile('box.xyz')
+
+    if args.stl:
+        obj.loadSTL(args.file)
+    else:
+        obj.loadFile(args.file)
     cam = Camera()
     w = Window(cam, obj)
     w.show()
